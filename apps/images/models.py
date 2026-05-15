@@ -1,9 +1,7 @@
-# Модели уже определены в apps/generation/models.py
-# Здесь мы создадим дополнительные методы и менеджеры
-
 from django.db import models
 from apps.generation.models import GenerationImage
 
+# Добавляем менеджер к существующей модели
 class ImageManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset()

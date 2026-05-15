@@ -10,17 +10,19 @@ class GenerationImageSerializer(serializers.ModelSerializer):
         fields = ['image_id', 'url', 'width', 'height']
     
     def get_url(self, obj):
-        request = self.context.get('request')
-        if obj.image and request:
-            return request.build_absolute_uri(obj.url)
-        return obj.url
+        if obj.image and hasattr(obj.image, 'url'):
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 
 class GenerationResponseSerializer(serializers.ModelSerializer):
-    generated_images = GenerationImageSerializer(source='images', many=True, read_only=True)
+    generated_images = GenerationImageSerializer(many=True, read_only=True)
     
     class Meta:
         model = Generation
-        fields = ['id', 'generated_text', 'generated_images', 'created_at']
+        fields = ['id', 'prompt', 'generated_text', 'generated_images', 'status', 'created_at']
 
 class GenerationRequestSerializer(serializers.Serializer):
     prompt = serializers.CharField(max_length=1000)
@@ -29,8 +31,3 @@ class GenerationRequestSerializer(serializers.Serializer):
         max_length=5,
         required=False
     )
-    
-    def validate_prompt(self, value):
-        if len(value) > 1000:
-            raise serializers.ValidationError("Промпт слишком длинный. Максимум 1000 символов.")
-        return value

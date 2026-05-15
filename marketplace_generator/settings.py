@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'apps.generation',
     'apps.analytics',
     'apps.images',
+
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -41,8 +43,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
-
+CORS_ALLOW_ALL_ORIGINS = True  # Для разработки
 ROOT_URLCONF = 'marketplace_generator.urls'
 
 TEMPLATES = [
@@ -139,3 +142,13 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+HUGGINGFACE_API_KEY = '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'
+
+# В конце файла settings.py
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Убедитесь, что STATIC_URL настроен
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')

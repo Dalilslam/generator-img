@@ -11,8 +11,20 @@ build/
 # Virtual Environment
 venv/
 env/
-.venv/
 ENV/
+.venv/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media
+/static
+
+# Environment variables
+.env
+.venv
 
 # IDE
 .vscode/
@@ -21,51 +33,16 @@ ENV/
 *.swo
 *~
 
-# Django
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-/media/
-/staticfiles/
-/static/
-
-# Environment variables
-.env
-.env.local
-.env.production
-.env.staging
-
 # OS
 .DS_Store
 Thumbs.db
-Desktop.ini
 
-# Coverage
-.coverage
-htmlcov/
-.pytest_cache/
+# Media files
+media/generated_images/*
+media/product_images/*
+!media/generated_images/.gitkeep
+!media/product_images/.gitkeep
 
-# Jupyter
-.ipynb_checkpoints/
-
-# pyenv
-.python-version
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# SQLite
-*.sqlite3
+# Migrations (опционально, оставьте если нужно)
+# */migrations/*
+# !*/migrations/__init__.py

@@ -28,8 +28,7 @@ class ImageListView(APIView):
             200: GenerationResponseSerializer(many=True),
         },
         tags=['Images (Вкладки изображений)'],
-        summary="Список изображений по вкладкам",
-        description="Получение списка генераций с фильтрацией по вкладкам"
+        summary="Список изображений по вкладкам"
     )
     def get(self, request):
         serializer = ImageListQuerySerializer(data=request.query_params)
@@ -37,26 +36,38 @@ class ImageListView(APIView):
         
         tab = serializer.validated_data['tab']
         
-        queryset = Generation.objects.filter(user=request.user)
+        # Базовый queryset
+        queryset = Generation.objects.filter(user=request.user, status='completed')
         
+        # Фильтрация по вкладкам
         if tab == 'generated':
             from datetime import timedelta
             from django.utils import timezone
             recent_date = timezone.now() - timedelta(days=1)
             queryset = queryset.filter(created_at__gte=recent_date)
         elif tab == 'favorites':
-            queryset = queryset.filter(images__is_favorite=True).distinct()
+            queryset = queryset.filter(generated_images__is_favorite=True).distinct()
         elif tab == 'archived':
-            queryset = queryset.filter(images__is_archived=True).distinct()
+            queryset = queryset.filter(generated_images__is_archived=True).distinct()
+        # history - показываем все
         
+        # Пагинация
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
         
         if page is not None:
-            serializer = GenerationResponseSerializer(page, many=True, context={'request': request})
+            serializer = GenerationResponseSerializer(
+                page, 
+                many=True, 
+                context={'request': request}
+            )
             return paginator.get_paginated_response(serializer.data)
         
-        serializer = GenerationResponseSerializer(queryset, many=True, context={'request': request})
+        serializer = GenerationResponseSerializer(
+            queryset, 
+            many=True, 
+            context={'request': request}
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @extend_schema(
@@ -67,8 +78,7 @@ class ImageListView(APIView):
             400: ErrorSerializer,
         },
         tags=['Images (Вкладки изображений)'],
-        summary="Удалить выбранные изображения",
-        description="Массовое удаление по ID"
+        summary="Удалить выбранные изображения"
     )
     def delete(self, request):
         serializer = ImageDeleteSerializer(data=request.data)
@@ -113,6 +123,7 @@ class ImageFavoriteView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         
+        # Переключение статуса избранного
         image.is_favorite = not image.is_favorite
         image.save()
         

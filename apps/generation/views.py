@@ -21,19 +21,21 @@ class GenerationView(APIView):
             500: ErrorSerializer,
         },
         tags=['Generation'],
-        summary="Генерация рекламного комплекта (текст + 4 изображения)",
-        description="Основное окно рабочего пространства. Принимает промпт и фото товара, возвращает готовый контент."
+        summary="Генерация рекламного комплекта",
+        description="Принимает промпт и фото товара, возвращает готовый контент."
     )
     def post(self, request):
         serializer = GenerationRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        # Создание записи генерации
         generation = Generation.objects.create(
             user=request.user,
             prompt=serializer.validated_data['prompt'],
             status='processing'
         )
         
+        # Сохранение загруженных изображений товара
         if 'product_images' in request.FILES:
             images = request.FILES.getlist('product_images')
             for image in images[:5]:
@@ -42,7 +44,9 @@ class GenerationView(APIView):
                     image=image
                 )
         
-        success = AIGenerationService.process_generation(generation)
+        # Создаем экземпляр сервиса и запускаем генерацию
+        ai_service = AIGenerationService()
+        success = ai_service.process_generation(generation)
         
         if not success:
             return Response(
@@ -50,7 +54,12 @@ class GenerationView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
+        # Обновляем объект из базы
         generation.refresh_from_db()
-        response_serializer = GenerationResponseSerializer(generation, context={'request': request})
         
+        # Возвращаем результат
+        response_serializer = GenerationResponseSerializer(
+            generation, 
+            context={'request': request}
+        )
         return Response(response_serializer.data, status=status.HTTP_200_OK)

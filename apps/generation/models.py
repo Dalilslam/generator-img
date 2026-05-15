@@ -28,8 +28,8 @@ class Generation(models.Model):
 
 class GenerationImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    generation = models.ForeignKey(Generation, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='generated_images/')
+    generation = models.ForeignKey(Generation, on_delete=models.CASCADE, related_name='generated_images')
+    image = models.ImageField(upload_to='generated_images/', blank=True, null=True)
     width = models.IntegerField(default=1024)
     height = models.IntegerField(default=1024)
     is_favorite = models.BooleanField(default=False)
@@ -60,6 +60,3 @@ class ProductImage(models.Model):
         db_table = 'product_images'
         verbose_name = 'Фото товара'
         verbose_name_plural = 'Фото товаров'
-    
-    def __str__(self):
-        return f"Product Image {self.id}"
